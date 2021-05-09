@@ -3,11 +3,11 @@ const axios = require("axios");
 const LINE_MESSAGING_API = "https://api.line.me/v2/bot";
 const LINE_HEADER = {
   "Content-Type": "application/json",
-  Authorization: "Bearer YOUR-CHANNEL-ACCESS-TOKEN",
+  Authorization: `Bearer ${process.env.LINE_AUTHORIZATION}`,
 };
 
 const APE_BOARD_API = "https://api.line.me/v2/bot";
-const BSC_TOKEN = `YOUR-BSC-ADDRESS`;
+const BSC_TOKEN = process.env.bsc_address;
 
 const FARM_LIST = [
   { name: "Pancakeswap", key: "pancake-bsc" },
