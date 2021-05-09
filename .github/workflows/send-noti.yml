@@ -5,7 +5,7 @@ name: Send notification
 
 on:
   schedule:
-  - cron: "0 */1 * * *"
+  - cron: "1 * * * *"
 
 jobs:
   publish-pricing:
@@ -15,7 +15,6 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 12
-          registry-url: https://npm.pkg.github.com/
       - run: node index.js
         env:
           BSC_ADDRESS: ${{secrets.BSC_ADDRESS}}
