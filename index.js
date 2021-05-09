@@ -6,9 +6,8 @@ const LINE_HEADER = {
   Authorization: `Bearer ${process.env.LINE_AUTHORIZATION}`,
 };
 
-const APE_BOARD_API = "https://api.line.me/v2/bot";
+const APE_BOARD_API = "https://api2.apeboard.finance";
 const BSC_TOKEN = process.env.BSC_ADDRESS;
-
 const FARM_LIST = [
   { name: "Pancakeswap", key: "pancake-bsc" },
   { name: "Dopple Finance", key: "dopple" },
