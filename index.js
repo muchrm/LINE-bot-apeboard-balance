@@ -7,7 +7,7 @@ const LINE_HEADER = {
 };
 
 const APE_BOARD_API = "https://api.line.me/v2/bot";
-const BSC_TOKEN = process.env.bsc_address;
+const BSC_TOKEN = process.env.BSC_ADDRESS;
 
 const FARM_LIST = [
   { name: "Pancakeswap", key: "pancake-bsc" },
