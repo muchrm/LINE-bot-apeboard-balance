@@ -17,39 +17,335 @@ const getWalletTotal = async () => {
   const response = await axios.get(
     `${APE_BOARD_API}/wallet/user/bsc/${BSC_TOKEN}`
   );
-  const results = response.data;
   return {
-    name: "Wallet",
-    value: Math.round(
-      results.reduce((acc, wallet) => {
-        return acc + wallet.balance * wallet.price;
-      }, 0),
-      2
-    ),
+    name: "wallet",
+    value: response.data,
   };
 };
 
-const getFarmTotal = async (farmPortal) => {
-  const response = await axios.get(
-    `${APE_BOARD_API}/${farmPortal.key}/${BSC_TOKEN}`
+const getFarm = async (pool) => {
+  const response = await axios.get(`${APE_BOARD_API}/${pool.key}/${BSC_TOKEN}`);
+  return {
+    ...pool,
+    farms: response.data.farms,
+  };
+};
+
+const getFarmTotal = () =>
+  Promise.all(FARM_LIST.map(getFarm)).then((pools) => ({
+    name: "pools",
+    value: pools,
+  }));
+
+const getWalletBalance = (wallets) => {
+  return wallets.reduce((acc, wallet) => {
+    return acc + wallet.balance * wallet.price;
+  }, 0);
+};
+
+const getWalletWindow = (wallet) => {
+  return new Promise((resolve) => {
+    const sum = getWalletBalance(wallet);
+
+    const view = {
+      type: "box",
+      layout: "vertical",
+      margin: "xxl",
+      spacing: "sm",
+      contents: [
+        {
+          type: "box",
+          layout: "baseline",
+          spacing: "sm",
+          contents: [
+            {
+              type: "text",
+              text: "Wallet",
+              flex: 3,
+            },
+            {
+              type: "text",
+              text: `$${sum.toFixed(3)}`,
+              wrap: true,
+              color: "#E2C05B",
+              flex: 2,
+              align: "end",
+            },
+          ],
+        },
+        {
+          type: "separator",
+        },
+        {
+          type: "box",
+          layout: "baseline",
+          spacing: "sm",
+          contents: [
+            {
+              type: "text",
+              text: "Assets",
+              flex: 2,
+            },
+            {
+              type: "text",
+              text: `Balance`,
+              flex: 1,
+              size: "sm",
+              align: "end",
+            },
+            {
+              type: "text",
+              text: `Price`,
+              flex: 1,
+              size: "sm",
+              align: "end",
+            },
+            {
+              type: "text",
+              text: `Value`,
+              flex: 1,
+              size: "sm",
+              align: "end",
+            },
+          ],
+        },
+        ...wallet.map((asset) => ({
+          type: "box",
+          layout: "baseline",
+          spacing: "sm",
+          contents: [
+            {
+              type: "icon",
+              url: asset.logo,
+              size: "sm",
+            },
+            {
+              type: "text",
+              text: asset.symbol.toUpperCase(),
+              flex: 2,
+            },
+            {
+              type: "text",
+              text: `${asset.balance.toFixed(3)}`,
+              flex: 1,
+              size: "sm",
+              align: "end",
+            },
+            {
+              type: "text",
+              text: `${asset.price.toFixed(3)}`,
+              flex: 1,
+              size: "sm",
+              align: "end",
+            },
+            {
+              type: "text",
+              text: `$${(asset.price * asset.balance).toFixed(3)}`,
+              flex: 1,
+              size: "sm",
+              align: "end",
+            },
+          ],
+        })),
+      ],
+    };
+    resolve(view);
+  });
+};
+
+const getFarmBalance = (farms) => {
+  return farms.reduce((acc, farm) => {
+    const fromToken = farm.tokens.reduce(
+      (acc, token) => acc + token.balance * token.price,
+      0
+    );
+    const fromReward = farm.reward.balance * farm.reward.price;
+    return acc + fromToken + fromReward;
+  }, 0);
+};
+
+const getFarmWindow = (pool) => {
+  return new Promise((resolve) => {
+    const sum = getFarmBalance(pool.farms);
+
+    const view = {
+      type: "box",
+      layout: "vertical",
+      margin: "xxl",
+      spacing: "sm",
+      contents: [
+        {
+          type: "box",
+          layout: "baseline",
+          spacing: "sm",
+          contents: [
+            {
+              type: "text",
+              text: `${pool.name}`,
+              flex: 3,
+            },
+            {
+              type: "text",
+              text: `$${sum.toFixed(3)}`,
+              wrap: true,
+              color: "#E2C05B",
+              flex: 2,
+              align: "end",
+            },
+          ],
+        },
+        {
+          type: "separator",
+        },
+        {
+          type: "box",
+          layout: "baseline",
+          spacing: "sm",
+          contents: [
+            {
+              type: "text",
+              text: "Assets",
+              flex: 2,
+            },
+            {
+              type: "text",
+              text: `Balance`,
+              flex: 1,
+              size: "sm",
+              align: "end",
+            },
+            {
+              type: "text",
+              text: `Rewards`,
+              flex: 1,
+              size: "sm",
+              align: "end",
+            },
+            {
+              type: "text",
+              text: `Value`,
+              flex: 1,
+              size: "sm",
+              align: "end",
+            },
+          ],
+        },
+        ...pool.farms.map((farm) => {
+          const fromToken = farm.tokens.reduce(
+            (acc, token) => acc + token.balance * token.price,
+            0
+          );
+          const fromReward = farm.reward.balance * farm.reward.price;
+
+          return {
+            type: "box",
+            layout: "baseline",
+            spacing: "sm",
+            contents: [
+              {
+                type: "text",
+                text: farm.tokens
+                  .map((token) => token.symbol.toUpperCase())
+                  .join("+"),
+                flex: 2,
+              },
+              {
+                type: "text",
+                text: `${fromToken.toFixed(3)}`,
+                flex: 1,
+                size: "sm",
+                align: "end",
+              },
+              {
+                type: "text",
+                text: `${fromReward.toFixed(3)}`,
+                flex: 1,
+                size: "sm",
+                align: "end",
+              },
+              {
+                type: "text",
+                text: `${(fromToken + fromReward).toFixed(3)}`,
+                flex: 1,
+                size: "sm",
+                align: "end",
+              },
+            ],
+          };
+        }),
+      ],
+    };
+    resolve(view);
+  });
+};
+
+const getNetWorth = (model) => {
+  return new Promise((resolve) => {
+    const sumWallet = getWalletBalance(model.wallet);
+
+    const sumFarm = model.pools.reduce((acc, pool) => {
+      const sum = getFarmBalance(pool.farms);
+      return acc + sum;
+    }, 0);
+
+    resolve({
+      type: "box",
+      layout: "vertical",
+      margin: "xxl",
+      spacing: "sm",
+      contents: [
+        {
+          type: "box",
+          layout: "baseline",
+          spacing: "sm",
+          contents: [
+            {
+              type: "text",
+              text: `Total:`,
+              flex: 2,
+            },
+            {
+              type: "text",
+              text: `${(sumWallet + sumFarm).toFixed(3)}`,
+              flex: 2,
+              wrap: true,
+              color: "#E2C05B",
+              align: "end",
+            },
+          ],
+        },
+      ],
+    });
+  });
+};
+
+const broadcast = async (priceCurrent) => {
+  const model = priceCurrent.reduce(
+    (acc, list) => ({ ...acc, [list.name]: list.value }),
+    {}
   );
-  const results = response.data;
-  return {
-    ...farmPortal,
-    value: Math.round(
-      results.farms.reduce((acc, farm) => {
-        const fromToken = farm.tokens.reduce(
-          (acc, token) => acc + token.balance * token.price,
-          0
-        );
-        const fromReward = farm.reward.balance * farm.reward.price;
-        return acc + fromToken + fromReward;
-      }, 0)
-    ),
-  };
-};
 
-const broadcast = (priceCurrent) => {
+  let windows = await Promise.all([
+    getNetWorth(model),
+    {
+      type: "separator",
+    },
+    getWalletWindow(model.wallet),
+    ...model.pools.map(getFarmWindow),
+    
+  ]);
+
+  windows = windows.reduce(
+    (acc, asset) => [
+      ...acc,
+      {
+        type: "filler",
+      },
+      asset,
+    ],
+    []
+  );
+
   return axios({
     method: "post",
     url: `${LINE_MESSAGING_API}/message/broadcast`,
@@ -75,95 +371,7 @@ const broadcast = (priceCurrent) => {
                   size: "xl",
                   align: "center",
                 },
-                {
-                  type: "box",
-                  layout: "vertical",
-                  margin: "xxl",
-                  spacing: "sm",
-                  contents: [
-                    {
-                      type: "box",
-                      layout: "baseline",
-                      spacing: "sm",
-                      contents: [
-                        {
-                          type: "text",
-                          text: "Value",
-                          wrap: true,
-                          color: "#E2C05B",
-                          flex: 5,
-                          align: "end",
-                        },
-                      ],
-                    },
-                    {
-                      type: "box",
-                      layout: "baseline",
-                      spacing: "sm",
-                      contents: [
-                        {
-                          type: "text",
-                          text: "Wallet",
-                          flex: 4,
-                        },
-                        {
-                          type: "text",
-                          text: `${priceCurrent[0].value}$`,
-                          flex: 1,
-                          size: "sm",
-                          align: "end",
-                        },
-                      ],
-                    },
-                    {
-                      type: "separator",
-                    },
-                    ...priceCurrent.slice(1).map((farm) => ({
-                      type: "box",
-                      layout: "baseline",
-                      spacing: "sm",
-                      contents: [
-                        {
-                          type: "text",
-                          text: farm.name,
-                          flex: 3,
-                        },
-                        {
-                          type: "text",
-                          text: `${farm.value}$`,
-                          flex: 1,
-                          size: "sm",
-                          align: "end",
-                        },
-                      ],
-                    })),
-                    {
-                      type: "separator",
-                    },
-                    {
-                      type: "box",
-                      layout: "baseline",
-                      spacing: "sm",
-                      contents: [
-                        {
-                          type: "text",
-                          text: "Total",
-                          flex: 3,
-                        },
-                        {
-                          type: "text",
-                          text: `${priceCurrent.reduce(
-                            (acc, farm) => acc + farm.value,
-                            0
-                          )}$`,
-                          flex: 1,
-                          size: "sm",
-                          align: "end",
-                        },
-                      ],
-                    },
-                  ],
-                },
+                ...windows,
               ],
             },
           },
@@ -173,4 +381,4 @@ const broadcast = (priceCurrent) => {
   });
 };
 
-Promise.all([getWalletTotal(), ...FARM_LIST.map(getFarmTotal)]).then(broadcast);
+Promise.all([getWalletTotal(), getFarmTotal()]).then(broadcast);
