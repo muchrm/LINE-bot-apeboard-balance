@@ -140,7 +140,7 @@ const getWalletWindow = (wallet) => {
             },
             {
               type: "text",
-              text: `$${(asset.price * asset.balance).toFixed(3)}`,
+              text: `${(asset.price * asset.balance).toFixed(3)}`,
               flex: 1,
               size: "sm",
               align: "end",
@@ -306,7 +306,7 @@ const getNetWorth = (model) => {
             },
             {
               type: "text",
-              text: `${(sumWallet + sumFarm).toFixed(3)}`,
+              text: `$${(sumWallet + sumFarm).toFixed(3)}`,
               flex: 2,
               wrap: true,
               color: "#E2C05B",
