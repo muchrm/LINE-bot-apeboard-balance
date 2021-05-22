@@ -1,4 +1,4 @@
-const  axios = require("axios");
+const axios = require("axios");
 
 const LINE_MESSAGING_API = "https://api.line.me/v2/bot";
 const LINE_HEADER = {
@@ -235,7 +235,7 @@ const getFarmWindow = (pool) => {
 
           return {
             type: "box",
-            layout: "baseline",
+            layout: "horizontal",
             spacing: "sm",
             contents: [
               {
@@ -246,11 +246,25 @@ const getFarmWindow = (pool) => {
                 flex: 2,
               },
               {
-                type: "text",
-                text: `${fromToken.toFixed(3)}`,
-                flex: 1,
-                size: "sm",
-                align: "end",
+                type: "box",
+                layout: "vertical",
+                spacing: "sm",
+                contents: [
+                  {
+                    type: "text",
+                    text: `${fromToken.toFixed(3)}`,
+                    flex: 1,
+                    size: "sm",
+                    align: "end",
+                  },
+                  ...farm.tokens.map((token) => ({
+                    type: "text",
+                    text: `${token.balance.toFixed(3)}`,
+                    flex: 1,
+                    size: "sm",
+                    align: "end",
+                  })),
+                ],
               },
               {
                 type: "text",
@@ -341,38 +355,40 @@ const broadcast = async (priceCurrent) => {
     []
   );
 
+  const message = JSON.stringify({
+    messages: [
+      {
+        type: "flex",
+        altText: "Flex Message",
+        contents: {
+          type: "bubble",
+          size: "giga",
+          body: {
+            type: "box",
+            layout: "vertical",
+            paddingAll: "8%",
+            backgroundColor: "#FFF9E2",
+            contents: [
+              {
+                type: "text",
+                text: "Total Assets",
+                weight: "bold",
+                size: "xl",
+                align: "center",
+              },
+              ...windows,
+            ],
+          },
+        },
+      },
+    ],
+  })
+
   return axios({
     method: "post",
     url: `${LINE_MESSAGING_API}/message/broadcast`,
     headers: LINE_HEADER,
-    data: JSON.stringify({
-      messages: [
-        {
-          type: "flex",
-          altText: "Flex Message",
-          contents: {
-            type: "bubble",
-            size: "giga",
-            body: {
-              type: "box",
-              layout: "vertical",
-              paddingAll: "8%",
-              backgroundColor: "#FFF9E2",
-              contents: [
-                {
-                  type: "text",
-                  text: "Total Assets",
-                  weight: "bold",
-                  size: "xl",
-                  align: "center",
-                },
-                ...windows,
-              ],
-            },
-          },
-        },
-      ],
-    }),
+    data: message,
   });
 };
 
