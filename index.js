@@ -1,4 +1,4 @@
-const axios = require("axios");
+const  axios = require("axios");
 
 const LINE_MESSAGING_API = "https://api.line.me/v2/bot";
 const LINE_HEADER = {
@@ -14,9 +14,7 @@ const FARM_LIST = [
 ];
 
 const getWalletTotal = async () => {
-  const response = await axios.get(
-    `${APE_BOARD_API}/wallet/user/bsc/${BSC_TOKEN}`
-  );
+  const response = await axios.get(`${APE_BOARD_API}/wallet/bsc/${BSC_TOKEN}`);
   return {
     name: "wallet",
     value: response.data,
@@ -153,13 +151,14 @@ const getWalletWindow = (wallet) => {
   });
 };
 
+const getTotalPrice = (tokens) => {
+  return tokens.reduce((acc, token) => acc + token.balance * token.price, 0);
+};
+
 const getFarmBalance = (farms) => {
   return farms.reduce((acc, farm) => {
-    const fromToken = farm.tokens.reduce(
-      (acc, token) => acc + token.balance * token.price,
-      0
-    );
-    const fromReward = farm.reward.balance * farm.reward.price;
+    const fromToken = getTotalPrice(farm.tokens);
+    const fromReward = getTotalPrice(farm.rewards);
     return acc + fromToken + fromReward;
   }, 0);
 };
@@ -231,11 +230,8 @@ const getFarmWindow = (pool) => {
           ],
         },
         ...pool.farms.map((farm) => {
-          const fromToken = farm.tokens.reduce(
-            (acc, token) => acc + token.balance * token.price,
-            0
-          );
-          const fromReward = farm.reward.balance * farm.reward.price;
+          const fromToken = getTotalPrice(farm.tokens);
+          const fromReward = getTotalPrice(farm.rewards);
 
           return {
             type: "box",
@@ -332,7 +328,6 @@ const broadcast = async (priceCurrent) => {
     },
     getWalletWindow(model.wallet),
     ...model.pools.map(getFarmWindow),
-    
   ]);
 
   windows = windows.reduce(
