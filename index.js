@@ -83,24 +83,28 @@ const getWalletWindow = (wallet) => {
             {
               type: "text",
               text: "Assets",
+              weight: "bold",
             },
             {
               type: "text",
               text: `Balance`,
-              size: "sm",
+
               align: "end",
+              weight: "bold",
             },
             {
               type: "text",
               text: `Price`,
-              size: "sm",
+
               align: "end",
+              weight: "bold",
             },
             {
               type: "text",
               text: `Value`,
-              size: "sm",
+
               align: "end",
+              weight: "bold",
             },
           ],
         },
@@ -121,19 +125,19 @@ const getWalletWindow = (wallet) => {
             {
               type: "text",
               text: `${asset.balance.toFixed(3)}`,
-              size: "sm",
+
               align: "end",
             },
             {
               type: "text",
               text: `$${asset.price.toFixed(3)}`,
-              size: "sm",
+
               align: "end",
             },
             {
               type: "text",
               text: `$${(asset.price * asset.balance).toFixed(3)}`,
-              size: "sm",
+
               align: "end",
             },
           ],
@@ -176,6 +180,7 @@ const getFarmWindow = (pool) => {
               text: `${pool.name}`,
               weight: "bold",
               align: "start",
+              flex: 3,
             },
             {
               type: "filler",
@@ -186,6 +191,7 @@ const getFarmWindow = (pool) => {
               wrap: true,
               color: "#E2C05B",
               align: "end",
+              flex: 2,
             },
           ],
         },
@@ -200,23 +206,24 @@ const getFarmWindow = (pool) => {
             {
               type: "text",
               text: "Pool",
+              weight: "bold",
             },
             {
               type: "text",
               text: `Balance`,
-              size: "sm",
+              weight: "bold",
               align: "end",
             },
             {
               type: "text",
               text: `Rewards`,
-              size: "sm",
+              weight: "bold",
               align: "end",
             },
             {
               type: "text",
               text: `Value`,
-              size: "sm",
+              weight: "bold",
               align: "end",
             },
           ],
@@ -235,7 +242,6 @@ const getFarmWindow = (pool) => {
                 text: farm.tokens
                   .map((token) => token.symbol.toUpperCase())
                   .join("+"),
-                flex: 1,
               },
               {
                 type: "box",
@@ -278,7 +284,6 @@ const getFarmWindow = (pool) => {
               {
                 type: "text",
                 text: `$${(fromToken + fromReward).toFixed(3)}`,
-                flex: 1,
                 size: "sm",
                 align: "end",
               },
@@ -342,12 +347,6 @@ const broadcast = async (priceCurrent) => {
     getWalletWindow(model.wallet),
     ...model.pools.map(getFarmWindow),
     getNetWorth(model),
-    {
-      type: "separator",
-    },
-    {
-      type: "filler",
-    },
     {
       type: "separator",
     },
