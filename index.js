@@ -59,14 +59,15 @@ const getWalletWindow = (wallet) => {
             {
               type: "text",
               text: "Wallet",
-              flex: 3,
+              weight: "bold",
+            },
+            {
+              type: "filler",
             },
             {
               type: "text",
               text: `$${sum.toFixed(3)}`,
-              wrap: true,
               color: "#E2C05B",
-              flex: 2,
               align: "end",
             },
           ],
@@ -82,26 +83,22 @@ const getWalletWindow = (wallet) => {
             {
               type: "text",
               text: "Assets",
-              flex: 2,
             },
             {
               type: "text",
               text: `Balance`,
-              flex: 1,
               size: "sm",
               align: "end",
             },
             {
               type: "text",
               text: `Price`,
-              flex: 1,
               size: "sm",
               align: "end",
             },
             {
               type: "text",
               text: `Value`,
-              flex: 1,
               size: "sm",
               align: "end",
             },
@@ -120,26 +117,22 @@ const getWalletWindow = (wallet) => {
             {
               type: "text",
               text: asset.symbol.toUpperCase(),
-              flex: 2,
             },
             {
               type: "text",
               text: `${asset.balance.toFixed(3)}`,
-              flex: 1,
               size: "sm",
               align: "end",
             },
             {
               type: "text",
-              text: `${asset.price.toFixed(3)}`,
-              flex: 1,
+              text: `$${asset.price.toFixed(3)}`,
               size: "sm",
               align: "end",
             },
             {
               type: "text",
-              text: `${(asset.price * asset.balance).toFixed(3)}`,
-              flex: 1,
+              text: `$${(asset.price * asset.balance).toFixed(3)}`,
               size: "sm",
               align: "end",
             },
@@ -181,14 +174,17 @@ const getFarmWindow = (pool) => {
             {
               type: "text",
               text: `${pool.name}`,
-              flex: 3,
+              weight: "bold",
+              align: "start",
+            },
+            {
+              type: "filler",
             },
             {
               type: "text",
               text: `$${sum.toFixed(3)}`,
               wrap: true,
               color: "#E2C05B",
-              flex: 2,
               align: "end",
             },
           ],
@@ -203,27 +199,23 @@ const getFarmWindow = (pool) => {
           contents: [
             {
               type: "text",
-              text: "Assets",
-              flex: 2,
+              text: "Pool",
             },
             {
               type: "text",
               text: `Balance`,
-              flex: 1,
               size: "sm",
               align: "end",
             },
             {
               type: "text",
               text: `Rewards`,
-              flex: 1,
               size: "sm",
               align: "end",
             },
             {
               type: "text",
               text: `Value`,
-              flex: 1,
               size: "sm",
               align: "end",
             },
@@ -243,7 +235,7 @@ const getFarmWindow = (pool) => {
                 text: farm.tokens
                   .map((token) => token.symbol.toUpperCase())
                   .join("+"),
-                flex: 2,
+                flex: 1,
               },
               {
                 type: "box",
@@ -252,15 +244,32 @@ const getFarmWindow = (pool) => {
                 contents: [
                   {
                     type: "text",
-                    text: `${fromToken.toFixed(3)}`,
-                    flex: 1,
+                    text: `$${fromToken.toFixed(3)}`,
                     size: "sm",
                     align: "end",
                   },
                   ...farm.tokens.map((token) => ({
                     type: "text",
                     text: `${token.balance.toFixed(3)}`,
-                    flex: 1,
+                    size: "sm",
+                    align: "end",
+                  })),
+                ],
+              },
+              {
+                type: "box",
+                layout: "vertical",
+                spacing: "sm",
+                contents: [
+                  {
+                    type: "text",
+                    text: `$${fromReward.toFixed(3)}`,
+                    size: "sm",
+                    align: "end",
+                  },
+                  ...farm.rewards.map((token) => ({
+                    type: "text",
+                    text: `${token.balance.toFixed(3)}`,
                     size: "sm",
                     align: "end",
                   })),
@@ -268,14 +277,7 @@ const getFarmWindow = (pool) => {
               },
               {
                 type: "text",
-                text: `${fromReward.toFixed(3)}`,
-                flex: 1,
-                size: "sm",
-                align: "end",
-              },
-              {
-                type: "text",
-                text: `${(fromToken + fromReward).toFixed(3)}`,
+                text: `$${(fromToken + fromReward).toFixed(3)}`,
                 flex: 1,
                 size: "sm",
                 align: "end",
@@ -312,13 +314,14 @@ const getNetWorth = (model) => {
             {
               type: "text",
               text: `Total:`,
-              flex: 2,
+              weight: "bold",
+            },
+            {
+              type: "filler",
             },
             {
               type: "text",
               text: `$${(sumWallet + sumFarm).toFixed(3)}`,
-              flex: 2,
-              wrap: true,
               color: "#E2C05B",
               align: "end",
             },
@@ -336,24 +339,19 @@ const broadcast = async (priceCurrent) => {
   );
 
   let windows = await Promise.all([
+    getWalletWindow(model.wallet),
+    ...model.pools.map(getFarmWindow),
     getNetWorth(model),
     {
       type: "separator",
     },
-    getWalletWindow(model.wallet),
-    ...model.pools.map(getFarmWindow),
+    {
+      type: "filler",
+    },
+    {
+      type: "separator",
+    },
   ]);
-
-  windows = windows.reduce(
-    (acc, asset) => [
-      ...acc,
-      {
-        type: "filler",
-      },
-      asset,
-    ],
-    []
-  );
 
   const message = JSON.stringify({
     messages: [
@@ -366,7 +364,7 @@ const broadcast = async (priceCurrent) => {
           body: {
             type: "box",
             layout: "vertical",
-            paddingAll: "8%",
+            paddingAll: "3%",
             backgroundColor: "#FFF9E2",
             contents: [
               {
@@ -382,7 +380,7 @@ const broadcast = async (priceCurrent) => {
         },
       },
     ],
-  })
+  });
 
   return axios({
     method: "post",
