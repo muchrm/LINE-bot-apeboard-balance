@@ -210,18 +210,6 @@ const getFarmWindow = (pool) => {
             },
             {
               type: "text",
-              text: `Balance`,
-              weight: "bold",
-              align: "end",
-            },
-            {
-              type: "text",
-              text: `Rewards`,
-              weight: "bold",
-              align: "end",
-            },
-            {
-              type: "text",
               text: `Value`,
               weight: "bold",
               align: "end",
@@ -234,58 +222,72 @@ const getFarmWindow = (pool) => {
 
           return {
             type: "box",
-            layout: "horizontal",
+            layout: "vertical",
             spacing: "sm",
             contents: [
               {
-                type: "text",
-                text: farm.tokens
-                  .map((token) => token.symbol.toUpperCase())
-                  .join("+"),
-              },
-              {
                 type: "box",
-                layout: "vertical",
+                layout: "horizontal",
                 spacing: "sm",
                 contents: [
                   {
                     type: "text",
-                    text: `$${fromToken.toFixed(3)}`,
-                    size: "sm",
-                    align: "end",
+                    text: `${farm.tokens
+                      .map((token) => token.symbol.toUpperCase())
+                      .join("+")} ($${fromToken.toFixed(3)})`,
+                    flex: 4,
                   },
-                  ...farm.tokens.map((token) => ({
+                  {
                     type: "text",
-                    text: `${token.balance.toFixed(3)}`,
+                    text: `$${(fromToken + fromReward).toFixed(3)}`,
                     size: "sm",
                     align: "end",
-                  })),
+                    flex: 2,
+                  },
                 ],
               },
               {
                 type: "box",
-                layout: "vertical",
+                layout: "horizontal",
                 spacing: "sm",
                 contents: [
                   {
-                    type: "text",
-                    text: `$${fromReward.toFixed(3)}`,
-                    size: "sm",
-                    align: "end",
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm",
+                    flex: 3,
+                    contents: farm.tokens.map((token) => ({
+                      type: "text",
+                      text: `${token.balance.toFixed(
+                        3
+                      )} ${token.symbol.toUpperCase()}`,
+                      size: "xs",
+                      align: "start",
+                    })),
                   },
-                  ...farm.rewards.map((token) => ({
-                    type: "text",
-                    text: `${token.balance.toFixed(3)}`,
-                    size: "sm",
-                    align: "end",
-                  })),
+                  {
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm",
+                    flex: 2,
+                    contents: [
+                      {
+                        type: "text",
+                        text: `Rewards: $${fromReward.toFixed(3)}`,
+                        size: "xs",
+                        align: "end",
+                      },
+                      ...farm.rewards.map((token) => ({
+                        type: "text",
+                        text: `${token.balance.toFixed(
+                          3
+                        )} ${token.symbol.toUpperCase()}`,
+                        size: "xs",
+                        align: "end",
+                      })),
+                    ],
+                  },
                 ],
-              },
-              {
-                type: "text",
-                text: `$${(fromToken + fromReward).toFixed(3)}`,
-                size: "sm",
-                align: "end",
               },
             ],
           };
@@ -344,12 +346,9 @@ const broadcast = async (priceCurrent) => {
   );
 
   let windows = await Promise.all([
+    getNetWorth(model),
     getWalletWindow(model.wallet),
     ...model.pools.map(getFarmWindow),
-    getNetWorth(model),
-    {
-      type: "separator",
-    },
   ]);
 
   const message = JSON.stringify({
