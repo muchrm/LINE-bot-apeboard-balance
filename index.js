@@ -9,8 +9,8 @@ const LINE_HEADER = {
 const APE_BOARD_API = "https://api.apeboard.finance";
 const BSC_TOKEN = process.env.BSC_ADDRESS;
 const FARM_LIST = [
-  { name: "Pancakeswap", key: "pancake-bsc" },
-  { name: "Dopple Finance", key: "dopple" },
+  // { name: "Pancakeswap", key: "pancake-bsc" },
+  { name: "Dopple Finance", key: "doppleBsc" },
 ];
 
 const getWalletTotal = async () => {
@@ -114,8 +114,9 @@ const getWalletWindow = (wallet) => {
           spacing: "sm",
           contents: [
             {
-              type: "icon",
-              url: asset.logo,
+              type: asset.logo == null ? "text" : "icon",
+              [asset.logo == null ? "text" : "url"]:
+                asset.logo == null ? " " : asset.logo,
               size: "sm",
             },
             {
